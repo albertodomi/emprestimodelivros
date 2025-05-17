@@ -31,3 +31,18 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Sistema Operacional ###
+.DS_Store
+Thumbs.db
+
+### Logs e temporários ###
+*.log
+*.tmp
+*.swp
+
+### Maven wrapper properties ###
+.mvn/wrapper/maven-wrapper.properties
+
+### Arquivos locais ###
+.env
