@@ -1,6 +1,7 @@
 package emprestimodelivro.model;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,4 +20,7 @@ public class Usuario {
     private String email;
     private String telefone;
     private LocalDate dataNasc;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Emprestimo> emprestimos;
 }
