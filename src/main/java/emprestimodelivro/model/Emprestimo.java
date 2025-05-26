@@ -1,44 +1,37 @@
 package emprestimodelivro.model;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.Objects;
+import java.util.List;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Emprestimo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long codigo;
+    private Long id;
+
     @ManyToOne
-    private Usuario pessoa;
-    //@ManyToOne
-    //private Livro livro;
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
+
+    @ManyToMany
+    @JoinTable(
+        name = "emprestimo_livro",
+        joinColumns = @JoinColumn(name = "emprestimo_id"),
+        inverseJoinColumns = @JoinColumn(name = "livro_id")
+    )
+    private List<Livro> livros;
+
     private LocalDate dataEmprestimo;
     private LocalDate dataDevolucao;
-    @Enumerated(EnumType.STRING)
-    private StatusEmprestimo status;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(codigo);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null || getClass() != obj.getClass())
-            return false;
-        Emprestimo other = (Emprestimo) obj;
-        return Objects.equals(codigo, other.codigo);
-    }
-
-    @Override
-    public String toString() {
-        return "Emprestimo [codigo=" + codigo + ", pessoa=" + pessoa + /* ", livro=" + livro +*/
-               ", dataEmprestimo=" + dataEmprestimo + ", dataDevolucao=" + dataDevolucao +
-               ", status=" + status + "]";
-    }
+     @Enumerated(EnumType.STRING)
+    private SituacaoEmprestimo situacao;
 }

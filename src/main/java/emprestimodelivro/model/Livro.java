@@ -1,5 +1,4 @@
 package emprestimodelivro.model;
-import emprestimodelivro.model.Emprestimo;
 import java.util.List;
 
 import jakarta.persistence.*;
