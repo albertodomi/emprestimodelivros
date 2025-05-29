@@ -18,6 +18,7 @@ public class Livro {
     private String autor;
     private Integer anoPublicacao;
 
-    @ManyToMany(mappedBy = "livros")
-    private List<Emprestimo> emprestimos;
+    @Enumerated(EnumType.STRING)
+    private SituacaoLivro situacao;
+
 }
