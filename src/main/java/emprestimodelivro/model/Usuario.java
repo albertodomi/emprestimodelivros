@@ -21,6 +21,4 @@ public class Usuario {
     private String telefone;
     private LocalDate dataNasc;
 
-    @OneToMany(mappedBy = "usuario")
-    private List<Emprestimo> emprestimos;
 }
