@@ -1,4 +1,4 @@
-package emprestimodelivro.emprestimodelivro;
+package emprestimodelivro;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

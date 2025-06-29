@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout (~{::title}, ~{::section})}">
+<head>
+    <title th:text="${usuario.id == null ? 'Novo Usuário' : 'Editar Usuário'}">Formulário de Usuário</title>
+</head>
+<body>
+    <section>
+        <h1 th:text="${usuario.id == null ? 'Novo Usuário' : 'Editar Usuário'}">Formulário de Usuário</h1>
+        <form th:action="@{'/usuarios/editar/' + ${usuario.id}}" th:object="${usuario}" method="post">
+            <input type="hidden" th:field="*{id}" />
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome:</label>
+                <input type="text" id="nome" th:field="*{nome}" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" id="email" th:field="*{email}" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label for="telefone" class="form-label">Telefone:</label>
+                <input type="text" id="telefone" th:field="*{telefone}" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="dataNasc" class="form-label">Data de Nascimento:</label>
+                <input type="date" id="dataNasc" th:field="*{dataNasc}" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-success">Salvar</button>
+            <a href="/admin/dashboard" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </section>
+</body>
+</html>
+
+<!-- ESSE FORMULARIO É DE EDITAR-->

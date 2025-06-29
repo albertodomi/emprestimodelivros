@@ -1,0 +1,7 @@
+CREATE TABLE livro (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(200) NOT NULL,
+    autor VARCHAR(100),
+    ano_publicacao INT,
+    situacao ENUM('DISPONIVEL', 'EMPRESTADO') DEFAULT 'DISPONIVEL'
+);

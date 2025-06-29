@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout (~{::title}, ~{::section})}">
+<head>
+    <title>Lista de Livros</title>
+</head>
+<body>
+    <section>
+        <h1>Lista de Livros</h1>
+        
+        <!-- Exibir mensagens flash -->
+        <div th:if="${message}" th:class="${'alert alert-' + (type == 'success' ? 'success' : 'danger')}" class="alert alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Autor</th>
+                    <th>Ano Publicação</th>
+                    <th>Situação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="livro : ${livros}">
+                    <td th:text="${livro.id}"></td>
+                    <td th:text="${livro.titulo}"></td>
+                    <td th:text="${livro.autor}"></td>
+                    <td th:text="${livro.anoPublicacao}"></td>
+                    <td th:text="${livro.situacao.toString()}"></td>
+                    <td>
+                        <div class="btn-group">
+                            <!-- Menu dropdown para alterar situação -->
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary btn-sm dropdown-toggle" 
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    Alterar Situação
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li th:if="${livro.situacao != T(emprestimodelivro.model.SituacaoLivro).DISPONIVEL}">
+                                        <a class="dropdown-item" th:href="@{/livros/atualizar-situacao/{id}(id=${livro.id}, novaSituacao='DISPONIVEL')}">
+                                            Marcar como Disponível
+                                        </a>
+                                    </li>
+                                    <li th:if="${livro.situacao != T(emprestimodelivro.model.SituacaoLivro).EMPRESTADO}">
+                                        <a class="dropdown-item" th:href="@{/livros/atualizar-situacao/{id}(id=${livro.id}, novaSituacao='EMPRESTADO')}">
+                                            Marcar como Emprestado
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Botão de exclusão -->
+                            <a th:href="@{/livros/deletar/{id}(id=${livro.id})}" 
+                               class="btn btn-danger btn-sm" 
+                               onclick="return confirm('Tem certeza que deseja deletar o livro: ' + this.getAttribute('data-titulo') + '?');"
+                               th:attr="data-titulo=${livro.titulo}">
+                               Deletar
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div th:if="${#lists.isEmpty(livros)}">
+            <p class="text-muted">Nenhum livro cadastrado.</p>
+        </div>
+        
+        <a th:href="@{/livros/novo}" class="btn btn-primary">Novo Livro</a>
+        <a href="/admin/dashboard" class="btn btn-primary btn-lg">Voltar</a>
+
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
