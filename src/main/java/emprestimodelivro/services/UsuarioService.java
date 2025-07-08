@@ -5,6 +5,7 @@ import emprestimodelivro.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page; // Import Page
 import org.springframework.data.domain.Pageable; // Import Pageable
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,11 +17,13 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public List<Usuario> findAll() {
         return usuarioRepository.findAll();
     }
 
-    // New method for pagination
     public Page<Usuario> findAll(Pageable pageable) {
         return usuarioRepository.findAll(pageable);
     }
@@ -29,7 +32,15 @@ public class UsuarioService {
         return usuarioRepository.findById(id);
     }
 
-    public Usuario save(Usuario usuario) {
+    public Usuario findByEmail(String email) {
+    return usuarioRepository.findByEmail(email).orElse(null);
+}
+
+   public Usuario save(Usuario usuario) {
+        // Criptografa a senha antes de salvar
+        if (usuario.getSenha() != null && !usuario.getSenha().startsWith("$2a$")) { 
+            usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+        }
         return usuarioRepository.save(usuario);
     }
 

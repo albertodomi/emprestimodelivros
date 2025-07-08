@@ -1,73 +1,21 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(title, content)">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title ?: 'Sistema de Empréstimo de Livros'}">Sistema de Empréstimo de Livros</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="${title} ?: 'Sistema de Empréstimo de Livros'">Sistema de Empréstimo de Livros</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <style>
-        body { padding-top: 70px; }
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: #f5f5f5;
-            padding: 10px 0;
-            text-align: center;
-            border-top: 1px solid #e7e7e7;
-        }
-        .container {
-            margin-bottom: 60px; /* Espaço para o rodapé fixo */
-        }
-    </style>
 </head>
-<body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-gray-800 fixed-top">
-        <div class="container-fluid mx-auto px-4">
-            <a class="navbar-brand text-white text-lg font-semibold" href="/">Empréstimo de Livros</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-md-0 flex space-x-4">
-                    <li class="nav-item">
-                        <a class="nav-link text-gray-300 hover:text-white" href="/usuarios">Usuários</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-gray-300 hover:text-white" href="/livros">Livros</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-gray-300 hover:text-white" href="/emprestimos">Empréstimos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-gray-300 hover:text-white" href="/emprestimos/realizar-form">Realizar Empréstimo</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+<body class="min-h-screen pt-[70px] flex flex-col">
+
+    <nav class="fixed top-0 left-0 right-0 h-[70px] bg-gray-800 flex items-center px-6 shadow-md z-50">
+        <a href="/" class="text-white text-xl font-bold">Empréstimo de Livros</a>
     </nav>
 
-    <div class="container mx-auto mt-4 p-4">
-        <div th:if="${message}" th:classappend="${type == 'success' ? 'bg-green-100 border border-green-400 text-green-700' : 'bg-red-100 border border-red-400 text-red-700'}" class="alert px-4 py-3 rounded relative" role="alert">
-            <span th:text="${message}"></span>
-            <button type="button" class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.style.display='none';">
-                <svg class="fill-current h-6 w-6 text-gray-700" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.15a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.15 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
-            </button>
-        </div>
+    <main class="flex-grow">
+        <div th:replace="${content}"></div>
+    </main>
 
-        <div th:fragment="layout(title, content)" th:remove="tag">
-            <!-- Conteúdo do layout aqui -->
-            <div th:replace="${content}">
-                <!-- Aqui será inserido o conteúdo da página -->
-            </div>
-        </div>
-    </div>
-
-    <footer class="footer bg-gray-200 text-gray-600">
-        <div class="container mx-auto px-4">
-            <span>&copy; 2024 Sistema de Empréstimo de Livros. Todos os direitos reservados.</span>
-        </div>
-    </footer>
 </body>
 </html>

@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "livros")
@@ -19,21 +20,27 @@ public class Livro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
+    @NotBlank(message = "Título é obrigatório")
     @Column(nullable = false)
     private String titulo;
-    
+
+    @NotBlank(message = "Autor é obrigatório")
     @Column(nullable = false)
     private String autor;
     
+    @NotNull(message = "Ano de publicação é obrigatório")
+    @Min(value = 1000, message = "Ano de publicação deve ser válido")
+    @Max(value = 2100, message = "Ano de publicação deve ser válido")
     @Column(name = "ano_publicacao")
     private Integer anoPublicacao;
 
+    @NotNull(message = "Situação é obrigatória")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SituacaoLivro situacao = SituacaoLivro.DISPONIVEL;
-    
-    // Adicionando campo para categoria
+
+    @NotNull(message = "Categoria é obrigatória")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Categoria categoria = Categoria.OUTROS;

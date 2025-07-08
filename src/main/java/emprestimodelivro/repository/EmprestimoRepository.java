@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface EmprestimoRepository extends JpaRepository<Emprestimo, Long> {
     @Query("SELECT e FROM Emprestimo e WHERE e.usuario.id = :usuarioId AND e.situacao = :situacao")
-    List<Emprestimo> findAbertosByUsuario(@Param("usuarioId") Long usuarioId, @Param("situacao") SituacaoEmprestimo situacao);
+    List<Emprestimo> findEmprestimosAbertos(@Param("usuarioId") Long usuarioId, @Param("situacao") SituacaoEmprestimo situacao);
 
-    Optional<Emprestimo> findByCodigo(String codigo);
+    List<Emprestimo> findBySituacao (@Param("situacao") SituacaoEmprestimo situacao);
 }

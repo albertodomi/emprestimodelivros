@@ -1,55 +1,78 @@
 package emprestimodelivro.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jakarta.servlet.http.HttpSession;
+import emprestimodelivro.model.Login;
+import emprestimodelivro.model.Usuario;
+import emprestimodelivro.services.EmprestimoService;
+import emprestimodelivro.services.LivroService;
+import emprestimodelivro.services.UsuarioService;
 
 @Controller
 public class LoginController {
+    
+    @Autowired
+    private UsuarioService usuarioService;
+    
+    @Autowired
+    private LivroService livroService;
+    
+    @Autowired
+    private EmprestimoService emprestimoService;
 
+    
+    
     @GetMapping("/login")
-    public String loginForm() {
+    public String loginForm(Model model) {
+        model.addAttribute("login", new Login());
         return "login/form";
     }
     
-    @PostMapping("/login")
-    public String processLogin(
-            @RequestParam String email, 
-            @RequestParam String senha,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
-        
-        // Simulação simples - aceita qualquer usuário/senha
-        session.setAttribute("usuarioLogado", true);
-        session.setAttribute("nomeUsuario", "Usuário Demonstração");
-        session.setAttribute("emailUsuario", email);
-        
-        // Redireciona para o dashboard após login
-        return "redirect:/usuarioComum/dashboard";
-    }
+
     
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/login?logout";
-    }
-    
+ 
     @GetMapping("/dashboard")
     public String dashboard() {
-        return "dashboard/index";
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        
+        Usuario usuario = usuarioService.findByEmail(email);
+        
+        // Redireciona conforme o tipo de usuário
+        if ("ADMIN".equals(String.valueOf(usuario.getTipoUsuario()))) {
+            return "redirect:/admin/dashboard";
+        } else {
+            return "redirect:/usuarioComum/dashboard";
+        }
     }
-
-     @GetMapping("/admin/dashboard")
-    public String adminDashboard() {
+    
+    @GetMapping("/admin/dashboard")
+    public String adminDashboard(Model model) {
+        
+        model.addAttribute("livro", new emprestimodelivro.model.Livro());
+        model.addAttribute("usuario", new emprestimodelivro.model.Usuario());
+        model.addAttribute("emprestimosAbertos", emprestimoService.findBySituacao("ABERTO"));
+    model.addAttribute("emprestimosFinalizados", emprestimoService.findBySituacao("FINALIZADO"));
         return "admin/dashboard";
     }
-
+    
     @GetMapping("/usuarioComum/dashboard")
-    public String usuarioComumDashboard() {
+    public String usuarioComumDashboard(Model model) {
+       
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        Usuario usuario = usuarioService.findByEmail(email);
+        
+       
+        model.addAttribute("livros", livroService.findAll()); 
+        model.addAttribute("meusEmprestimos", emprestimoService.findEmprestimosAbertosPorUsuario(usuario.getId())); // Para "Meus Empréstimos"
+        model.addAttribute("nomeUsuario", usuario.getNome()); 
+        
         return "usuarioComum/dashboard";
     }
 }

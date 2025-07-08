@@ -1,17 +1,16 @@
 package emprestimodelivro.services;
 
 import java.time.LocalDate; // Importa a classe Emprestimo
-import java.time.LocalDateTime;
-import java.util.List; // Importa a classe Livro
-import java.util.Optional; // Importa o enum SituacaoEmprestimo
+import java.util.List;
+import java.util.Optional; // Importa a classe Livro
 
-import org.springframework.stereotype.Service; // Importa o enum SituacaoLivro
-import org.springframework.transaction.annotation.Transactional; // Importa a classe Usuario
+import org.springframework.stereotype.Service; // Importa o enum SituacaoEmprestimo
+import org.springframework.transaction.annotation.Transactional; // Importa o enum SituacaoLivro
 
-import emprestimodelivro.model.Emprestimo; // Importa o EmprestimoRepository
-import emprestimodelivro.model.Livro; // Importa o LivroRepository (NOVO)
-import emprestimodelivro.model.SituacaoEmprestimo; // Importa o UsuarioRepository (NOVO)
-import emprestimodelivro.model.SituacaoLivro;
+import emprestimodelivro.model.Emprestimo; // Importa a classe Usuario
+import emprestimodelivro.model.Livro; // Importa o EmprestimoRepository
+import emprestimodelivro.model.SituacaoEmprestimo; // Importa o LivroRepository (NOVO)
+import emprestimodelivro.model.SituacaoLivro; // Importa o UsuarioRepository (NOVO)
 import emprestimodelivro.model.Usuario;
 import emprestimodelivro.repository.EmprestimoRepository;
 import emprestimodelivro.repository.LivroRepository;
@@ -49,68 +48,92 @@ public class EmprestimoService {
         emprestimoRepository.deleteById(id);
     }
 
-    // --- Lógica de Negócios ---
+    public List<Emprestimo> findEmprestimosAbertosPorUsuario(Long usuarioId) {
+    return emprestimoRepository.findEmprestimosAbertos(usuarioId, SituacaoEmprestimo.ABERTO);
+    }
 
-    @Transactional 
+
+    @Transactional
     public Emprestimo realizarEmprestimo(Long usuarioId, List<Long> livroIds) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + usuarioId)); // Busca o usuário
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + usuarioId));
 
-        List<Livro> livros = livroRepository.findAllById(livroIds); // Busca todos os livros pelos IDs
+        // ✅ ADICIONAR: Validação de empréstimos abertos
+        List<Emprestimo> emprestimosAbertos = findEmprestimosAbertosPorUsuario(usuarioId);
+        if (!emprestimosAbertos.isEmpty()) {
+            throw new RuntimeException("Você já possui empréstimo(s) em aberto. Devolva os livros antes de solicitar novos empréstimos.");
+        }
+
+        List<Livro> livros = livroRepository.findAllById(livroIds);
 
         if (livros.size() != livroIds.size()) {
             throw new RuntimeException("Um ou mais livros não foram encontrados.");
         }
 
         for (Livro livro : livros) {
-            if (livro.getSituacao() == SituacaoLivro.EMPRESTADO) { // Verifica se o livro está disponível
+            if (livro.getSituacao() == SituacaoLivro.EMPRESTADO) { 
                 throw new RuntimeException("O livro '" + livro.getTitulo() + "' não está disponível para empréstimo.");
             }
         }
 
-        Emprestimo emprestimo = new Emprestimo(); // Cria um novo empréstimo
-        emprestimo.setUsuario(usuario); // Define o usuário do empréstimo
-        emprestimo.setLivros(livros); // Define os livros do empréstimo
-        emprestimo.setData_emprestimo(LocalDate.now()); // Define a data de empréstimo como hoje
-        emprestimo.setSituacao(SituacaoEmprestimo.ABERTO); // Define o status como ABERTO
+        Emprestimo emprestimo = new Emprestimo();
+        emprestimo.setUsuario(usuario);
+        emprestimo.setLivros(livros);
+        emprestimo.setData_emprestimo(LocalDate.now());
+        emprestimo.setSituacao(SituacaoEmprestimo.ABERTO);
 
-        // Salva o empréstimo para gerar o ID, se necessário para o relacionamento ManyToMany
         Emprestimo savedEmprestimo = emprestimoRepository.save(emprestimo);
 
-        // Atualiza o status dos livros para EMPRESTADO
         for (Livro livro : livros) {
-            livro.setSituacao(SituacaoLivro.EMPRESTADO); // Altera o status do livro
+            livro.setSituacao(SituacaoLivro.EMPRESTADO);
             livroRepository.save(livro);
         }
 
         return savedEmprestimo;
     }
 
-
-@Transactional
-public void devolverLivros(String codigoEmprestimo, List<Long> livrosIds) {
-    Emprestimo emprestimo = emprestimoRepository.findByCodigo(codigoEmprestimo)
+    public void devolverLivros(Long emprestimoId, List<Long> livrosIds) {
+    Emprestimo emprestimo = emprestimoRepository.findById(emprestimoId)
         .orElseThrow(() -> new RuntimeException("Empréstimo não encontrado"));
 
-    for (Long livroId : livrosIds) {
-        Livro livro = emprestimo.getLivros().stream()
-            .filter(l -> l.getId().equals(livroId))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("Livro não encontrado no empréstimo"));
-
-        livro.setSituacao(SituacaoLivro.DISPONIVEL);
-        livroRepository.save(livro);
+    for (Livro livro : emprestimo.getLivros()) {
+        if (livrosIds.contains(livro.getId())) {
+            livro.setSituacao(SituacaoLivro.DISPONIVEL);
+            livroRepository.save(livro);
+        }
     }
 
-    // Verifica se todos os livros do empréstimo estão DISPONIVEL
-    boolean todosDevolvidos = emprestimo.getLivros().stream()
+    // Recarregue os livros do banco para garantir o status atualizado
+    List<Livro> livrosAtualizados = livroRepository.findAllById(
+        emprestimo.getLivros().stream().map(Livro::getId).toList()
+    );
+
+    boolean todosDevolvidos = livrosAtualizados.stream()
         .allMatch(l -> l.getSituacao() == SituacaoLivro.DISPONIVEL);
 
     if (todosDevolvidos) {
         emprestimo.setSituacao(SituacaoEmprestimo.FINALIZADO);
-        emprestimo.setData_devolucao(LocalDate.now());
+    } else {
+        emprestimo.setSituacao(SituacaoEmprestimo.ABERTO);
+    }
+    emprestimoRepository.save(emprestimo);
     }
 
-    emprestimoRepository.save(emprestimo);
-}
+
+public List<Emprestimo> findBySituacao(String situacao) {
+    SituacaoEmprestimo enumSituacao = SituacaoEmprestimo.valueOf(situacao);
+    System.out.println("Buscando empréstimos com situação: " + enumSituacao);
+    
+    List<Emprestimo> resultado = emprestimoRepository.findBySituacao(enumSituacao);
+    System.out.println("Resultados encontrados: " + resultado.size());
+    
+    // Log adicional para debug
+    for (Emprestimo emp : resultado) {
+        System.out.println("Empréstimo " + emp.getCodigo() + " - Situação: " + emp.getSituacao());
+    }
+    
+    
+    return resultado;
+    }
+
 }

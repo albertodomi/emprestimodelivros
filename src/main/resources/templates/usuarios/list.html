@@ -3,51 +3,66 @@
       th:replace="~{layout :: layout (~{::title}, ~{::section})}">
 <head>
     <title>Lista de Usuários</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 </head>
-<body>
-    <section>
-        <h1>Lista de Usuários</h1>
+<body class="bg-gray-100 min-h-screen">
+    <section class="max-w-5xl mx-auto mt-10 bg-white rounded-lg shadow p-8">
+        <h1 class="text-2xl font-bold text-blue-800 mb-6 text-center">Lista de Usuários</h1>
 
         <!-- Mensagens flash -->
-        <div th:if="${mensagem}" th:class="${'alert ' + alertClass}" class="alert" role="alert">
+        <div th:if="${mensagem}" 
+             th:classappend="${alertClass == 'alert-success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} + ' rounded p-4 mb-6 text-center flex items-center justify-between'"
+             class="mb-6">
             <span th:text="${mensagem}"></span>
+            <button type="button" class="ml-4 text-xl font-bold" onclick="this.parentElement.style.display='none'">&times;</button>
         </div>
 
-        <table class="table table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Nome</th>
-                    <th>Email</th>
-                    <th>Telefone</th>
-                    <th>Data de Nascimento</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="usuario : ${usuarios}">
-                    <td th:text="${usuario.id}"></td>
-                    <td th:text="${usuario.nome}"></td>
-                    <td th:text="${usuario.email}"></td>
-                    <td th:text="${usuario.telefone}"></td>
-                    <td th:text="${usuario.dataNasc}"></td>
-                    <td>
-                        <a th:href="@{/usuarios/editar/{id}(id=${usuario.id})}" class="btn btn-warning btn-sm">Editar</a>
-                        <a th:href="@{/usuarios/deletar/{id}(id=${usuario.id})}" class="btn btn-danger btn-sm"
-                           onclick="return confirm('Tem certeza que deseja deletar o usuário: [[${usuario.nome}]]?');">
-                            Deletar
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div th:if="${#lists.isEmpty(usuarios)}">
-            <p class="text-muted">Nenhum usuário cadastrado.</p>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-blue-600">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-white uppercase">ID</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-white uppercase">Nome</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-white uppercase">Email</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-white uppercase">Telefone</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-white uppercase">Data de Nascimento</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-white uppercase">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-100" th:if="${not #lists.isEmpty(usuarios)}">
+                    <tr th:each="usuario : ${usuarios}" class="hover:bg-gray-50">
+                        <td class="px-4 py-2" th:text="${usuario.id}"></td>
+                        <td class="px-4 py-2" th:text="${usuario.nome}"></td>
+                        <td class="px-4 py-2" th:text="${usuario.email}"></td>
+                        <td class="px-4 py-2" th:text="${usuario.telefone}"></td>
+                        <td class="px-4 py-2" th:text="${usuario.dataNasc}"></td>
+                        <td class="px-4 py-2">
+                            <div class="flex flex-wrap gap-2">
+                                <a th:href="@{/usuarios/editar/{id}(id=${usuario.id})}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </a>
+                                <a th:href="@{/usuarios/deletar/{id}(id=${usuario.id})}" 
+                                   class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
+                                   onclick="return confirm('Tem certeza que deseja deletar o usuário ?');">
+                                    <i class="bi bi-trash"></i> Deletar
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
-        <a th:href="@{/usuarios/novo}" class="btn btn-primary">Novo Usuário</a>
-        <a href="/admin/dashboard" class="btn btn-secondary">Voltar</a>
+        <div th:if="${#lists.isEmpty(usuarios)}" class="text-center text-gray-500 py-8">
+            <i class="bi bi-info-circle"></i> Nenhum usuário cadastrado.
+        </div>
+
+        <div class="flex flex-wrap gap-3 mt-8 justify-center">
+            <a href="/admin/dashboard" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded transition flex items-center gap-2">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
     </section>
 </body>
 </html>
